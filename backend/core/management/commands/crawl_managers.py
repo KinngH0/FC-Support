@@ -5,7 +5,7 @@ import time
 import datetime
 from django.db import transaction
 from django.core.management.base import BaseCommand
-from core.models import Manager
+from core.models import Manager, ManagerTemp
 import concurrent.futures
 import random
 import logging
@@ -31,7 +31,12 @@ def clean_team_color(text):
 
 def log_with_time(msg):
     now = datetime.datetime.now().strftime('[%Y년 %m월 %d일 %H시 %M분 %S초]')
-    print(f"{now} {msg}")
+    if "[크롤링]" in msg:
+        print(f"{now} \033[92m{msg}\033[0m")
+    elif "OUID" in msg:
+        print(f"{now} \033[95m{msg}\033[0m")
+    else:
+        print(f"{now} {msg}")
 
 def robust_request(url, params=None, headers=None, max_retries=3, sleep_sec=1):
     for attempt in range(max_retries):
@@ -51,61 +56,49 @@ def crawl_page(page):
     for attempt in range(3):  # 최대 3번 재시도
         try:
             resp = robust_request(url, headers=headers)
-    soup = BeautifulSoup(resp.text, "html.parser")
-    rows = soup.select(".tbody .tr")
-    managers = []
-    for row in rows:
-        try:
-                    try:
-                        rank_elem = row.select_one(".rank_no")
-                        if not rank_elem:
-                            continue
-                        rank = int(rank_elem.text.strip())
-                    except Exception as e:
-                        print(f"[DEBUG] rank 파싱 실패: {e}")
+            soup = BeautifulSoup(resp.text, "html.parser")
+            rows = soup.select(".tbody .tr")
+            managers = []
+            
+            for row in rows:
+                try:
+                    # rank 파싱
+                    rank_elem = row.select_one(".rank_no")
+                    if not rank_elem:
                         continue
-                    try:
-            nickname = row.select_one(".name.profile_pointer").text.strip()
-                    except Exception as e:
-                        print(f"[DEBUG] nickname 파싱 실패: {e}")
-                        continue
-                    try:
-            club_value_text = row.select_one(".price").get("alt") or row.select_one(".price").text
-            club_value = int(club_value_text.replace(",", "")) if club_value_text.isdigit() else parse_club_value(row.select_one(".price").text)
-                    except Exception as e:
-                        print(f"[DEBUG] club_value 파싱 실패: {e}")
-                        continue
-                    try:
-                        team_color_elem = row.select_one(".td.team_color")
-                        if team_color_elem:
-                            team_color = clean_team_color(team_color_elem.text.strip())
-                        else:
-                            team_color = "알 수 없음"
-                    except Exception as e:
-                        print(f"[DEBUG] team_color 파싱 실패: {e}")
-                        continue
-                    try:
-            formation = row.select_one(".td.formation").text.strip()
-                    except Exception as e:
-                        print(f"[DEBUG] formation 파싱 실패: {e}")
-                        continue
-                    try:
-            score = int(float(row.select_one(".td.rank_r_win_point").text.strip()))
-                    except Exception as e:
-                        print(f"[DEBUG] score 파싱 실패: {e}")
-                        continue
-            managers.append({
-                "rank": rank,
-                "nickname": nickname,
-                "club_value": club_value,
-                "team_color": team_color,
-                "formation": formation,
-                "score": score,
-            })
+                    rank = int(rank_elem.text.strip())
+                    
+                    # nickname 파싱
+                    nickname = row.select_one(".name.profile_pointer").text.strip()
+                    
+                    # club_value 파싱
+                    club_value_text = row.select_one(".price").get("alt") or row.select_one(".price").text
+                    club_value = int(club_value_text.replace(",", "")) if club_value_text.isdigit() else parse_club_value(row.select_one(".price").text)
+                    
+                    # team_color 파싱
+                    team_color_elem = row.select_one(".td.team_color")
+                    team_color = clean_team_color(team_color_elem.text.strip()) if team_color_elem else "알 수 없음"
+                    
+                    # formation 파싱
+                    formation = row.select_one(".td.formation").text.strip()
+                    
+                    # score 파싱
+                    score = int(float(row.select_one(".td.rank_r_win_point").text.strip()))
+                    
+                    managers.append({
+                        "rank": rank,
+                        "nickname": nickname,
+                        "club_value": club_value,
+                        "team_color": team_color,
+                        "formation": formation,
+                        "score": score,
+                    })
                 except Exception as e:
-                    print(f"[DEBUG] 전체 파싱 실패: {e}")
-            continue
-    return managers
+                    print(f"[DEBUG] 행 파싱 실패: {e}")
+                    continue
+            
+            return managers
+            
         except Exception as e:
             if attempt == 2:  # 마지막 시도였다면
                 raise e
@@ -167,9 +160,26 @@ class Command(BaseCommand):
         log_with_time(f"[크롤링] 크롤링 완료 ({len(all_data):,}/10,000)")
         # DB 저장
         with transaction.atomic():
+            # 1. ManagerTemp 비우기
+            ManagerTemp.objects.all().delete()
+            # 2. 크롤링 데이터 임시 저장
+            temp_objs = [ManagerTemp(**m) for m in all_data]
+            ManagerTemp.objects.bulk_create(temp_objs)
+            # 3. Manager 테이블 초기화
             Manager.objects.all().delete()
-            for m in all_data:
-                Manager.objects.create(**m)
+            # 4. ManagerTemp → Manager로 복사
+            for temp in ManagerTemp.objects.all():
+                Manager.objects.create(
+                    rank=temp.rank,
+                    nickname=temp.nickname,
+                    club_value=temp.club_value,
+                    team_color=temp.team_color,
+                    formation=temp.formation,
+                    score=temp.score,
+                    created_at=temp.created_at,
+                )
+            # 5. ManagerTemp 비우기
+            ManagerTemp.objects.all().delete()
         # 크롤링 후 자동으로 API 호출 및 Player 저장
         from core.tasks import fetch_and_save_players_for_all_managers
         fetch_and_save_players_for_all_managers()

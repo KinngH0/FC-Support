@@ -14,6 +14,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+from django.utils import timezone
+import atexit
+import threading
 
 # API 키 하드코딩
 API_KEYS = [
@@ -94,7 +97,29 @@ def load_meta():
         raise
 
 def fetch_and_save_players_for_all_managers():
-    from core.models import Manager, Player
+    from core.models import Manager, Player, ManagerTemp, PlayerTemp
+    now = timezone.now()
+    # 1. players 테이블 데이터 존재 여부 확인
+    player_count = Player.objects.count()
+    need_update = False
+    if player_count == 0:
+        need_update = True
+    else:
+        # 가장 최신 row의 created_at 시(hour) 확인
+        latest = Player.objects.latest('created_at')
+        latest_hour = latest.created_at.replace(minute=0, second=0, microsecond=0, tzinfo=None)
+        now_hour = now.replace(minute=0, second=0, microsecond=0, tzinfo=None)
+        if latest_hour != now_hour:
+            need_update = True
+    if not need_update:
+        log_with_time(f"[DB] Player 테이블이 최신(동일 시각) → 데이터 유지, 갱신 생략")
+        return True
+    log_with_time(f"[DB] Player 테이블이 비었거나, created_at 시(hour)가 달라 데이터 갱신 시작")
+    # 2. 임시 테이블에 manager/players 데이터 수집 및 저장
+    # 기존 임시 테이블 비우기
+    ManagerTemp.objects.all().delete()
+    PlayerTemp.objects.all().delete()
+    # --- 이하 기존 크롤링/수집 로직(ouid/match_id/match_detail 등) 그대로 실행 ---
     max_retries = 3
     retry_delay = 5
 
@@ -775,4 +800,15 @@ def save_players_to_db(match_detail_results):
             ) for temp in PlayerTemp.objects.all()
         ])
     
-    return success_count, error_count 
+    return success_count, error_count
+
+def cleanup_threads():
+    # 남아있는 모든 non-main thread를 종료 대기
+    for t in threading.enumerate():
+        if t is not threading.main_thread():
+            try:
+                t.join(timeout=1)
+            except Exception:
+                pass
+
+atexit.register(cleanup_threads)

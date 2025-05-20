@@ -91,26 +91,19 @@ class CoreConfig(AppConfig):
 
                 # 메타데이터 로드
                 try:
-                    from core.tasks import load_meta  # 여기서 import
+                    from core.tasks import load_meta, fetch_and_save_players_for_all_managers
                     load_meta()
                     print('[메타데이터] 서버 시작시 메타데이터 로드 완료')
                 except Exception as e:
                     print(f'[메타데이터] 로드 실패: {e}')
 
-                # DB 초기화: 서버 시작 시 Manager, Player 테이블 전체 삭제
+                # 서버 시작 시 Player 데이터 최신성 체크 후 필요할 때만 수집
                 try:
-                    from core.models import Manager, Player
-                    Manager.objects.all().delete()
-                    Player.objects.all().delete()
-                    print('[DB] 서버 재시작으로 Manager, Player 테이블 전체 삭제 완료')
+                    fetch_and_save_players_for_all_managers()
                 except Exception as e:
-                    print(f'[DB] 초기화 실패: {e}')
+                    print(f'[DB] Player 데이터 최신성 체크 및 수집 실패: {e}')
 
                 # 크롤링 스케줄러 시작
-                time.sleep(1)
-                from core.management.commands.crawl_managers import log_with_time
-                log_with_time('[크롤링] 서버 시작시 최초 데이터 수집 실행')
-                crawl_once()
                 crawl_scheduler()
 
             t = threading.Thread(target=initialize_db_and_start_scheduler, daemon=True)

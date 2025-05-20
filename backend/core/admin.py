@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Manager, Player, Notice, Update, Resource
+from .models import Manager, Player, Notice, Update, Resource, Review
 
 @admin.register(Manager)
 class ManagerAdmin(admin.ModelAdmin):
@@ -10,6 +10,12 @@ class ManagerAdmin(admin.ModelAdmin):
 class PlayerAdmin(admin.ModelAdmin):
     list_display = ('rank', 'nickname', 'team_color', 'position', 'player_name', 'season', 'grade', 'created_at')
     ordering = ('rank', 'position')
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('spid', 'season_id', 'name', 'review', 'score', 'grade', 'ip', 'created_at')  # grade, ip 컬럼 추가
+    search_fields = ('spid', 'season_id', 'name', 'review')
+    list_filter = ('season_id', 'score')
 
 admin.site.register(Notice)
 admin.site.register(Update)

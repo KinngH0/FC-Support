@@ -70,3 +70,24 @@ class ManagerTemp(models.Model):
 
     def __str__(self):
         return f"{self.rank}위 {self.nickname} ({self.team_color})"
+
+class VisitorLog(models.Model):
+    ip = models.GenericIPAddressField()
+    user_agent = models.CharField(max_length=256, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Review(models.Model):
+    spid = models.CharField(max_length=16)  # 선수 id (str)
+    season_id = models.CharField(max_length=8)  # 시즌 id (str)
+    name = models.CharField(max_length=32)  # 닉네임
+    password = models.CharField(max_length=128)  # 비밀번호(해시 또는 평문)
+    review = models.TextField()  # 리뷰 내용
+    score = models.PositiveSmallIntegerField()  # 별점(1~5)
+    grade = models.PositiveSmallIntegerField(default=1)  # 강화단계
+    ip = models.GenericIPAddressField(null=True, blank=True)  # 작성자 IP
+    created_at = models.DateTimeField(auto_now_add=True)
+    good = models.PositiveIntegerField(default=0)  # 추천 수
+    bad = models.PositiveIntegerField(default=0)  # 비추천 수
+
+    def __str__(self):
+        return f"{self.name} - {self.spid} ({self.season_id})"

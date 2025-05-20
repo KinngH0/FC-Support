@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Input, Button, Space } from 'antd';
-import type { TableProps } from 'antd';
+import { Table } from 'antd';
+import TextField from '@mui/material/TextField';
 
 interface PlayerStat {
     match_id: string;
@@ -27,7 +27,9 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ matchId }) => {
     const [players, setPlayers] = useState<PlayerStat[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const columns: TableProps<PlayerStat>['columns'] = [
+    // TableProps 제네릭 사용 제거, columns any[]로 명시적 캐스팅
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const columns = [
         {
             title: '선수 ID',
             dataIndex: 'spid',
@@ -111,7 +113,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ matchId }) => {
     return (
         <div style={{ padding: '24px' }}>
             <Table
-                columns={columns}
+                columns={columns as any}
                 dataSource={players}
                 rowKey={(record) => `${record.match_id}-${record.spid}`}
                 loading={loading}
@@ -120,4 +122,4 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ matchId }) => {
     );
 };
 
-export default PlayerStats; 
+export default PlayerStats;

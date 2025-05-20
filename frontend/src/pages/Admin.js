@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../contexts/AdminContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Typography, Paper, Tabs, Tab, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, List, ListItem, ListItemText, Button, TextField, Stack, Alert, LinearProgress, TablePagination } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from 'recharts';
 import Database from './Database';
+import axios from 'axios';
 
 const tabList = [
   { label: '트래픽/방문자', value: 'traffic' },
@@ -89,6 +91,7 @@ function logAlert(msg, type) {
 // 실제 데이터만 사용하도록 수정
 const Admin = () => {
   const { isAdmin } = useAdmin();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [tab, setTab] = useState('traffic');
@@ -103,10 +106,15 @@ const Admin = () => {
   const [errorLogs, setErrorLogs] = useState([]);
   const [serverStats, setServerStats] = useState({ cpu: 0, memory: 0, disk: 0 });
   const [contentStats, setContentStats] = useState({ totalUsers: 0, activeUsers: 0, totalPosts: 0, totalComments: 0 });
+  const [todayVisitorCount, setTodayVisitorCount] = useState(0);
 
   useEffect(() => {
     if (!isAdmin) navigate('/');
   }, [isAdmin, navigate]);
+
+  useEffect(() => {
+    if (!user) navigate('/login');
+  }, [user, navigate]);
 
   useEffect(() => {
     recordTraffic(location.pathname);
@@ -120,6 +128,12 @@ const Admin = () => {
     setAlertList(getAlerts());
     setContentStats(getContentStats());
   }, [tab]);
+
+  useEffect(() => {
+    axios.get('/api/today-visitor-count/').then(res => {
+      setTodayVisitorCount(res.data.today_visitor_count);
+    });
+  }, []);
 
   // IP 차단/해제
   const handleBlockIp = () => {
@@ -168,7 +182,7 @@ const Admin = () => {
             <Typography variant="h6">트래픽/방문자</Typography>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ mb: 2 }}>
-              <Chip label={`오늘 방문자: ${traffic.visitors.length}`} sx={{ mr: 1 }} />
+              <Chip label={`오늘 방문자: ${todayVisitorCount}`} sx={{ mr: 1 }} />
               <Chip label={`페이지뷰: ${traffic.pageviews}`} sx={{ mr: 1 }} />
             </Box>
             <Typography variant="subtitle1" sx={{ mt: 2 }}>인기 페이지</Typography>

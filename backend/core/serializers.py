@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Notice, Update, Resource
+from .models import Notice, Update, Resource, Review
 
 class NoticeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,4 +17,10 @@ class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = '__all__'
-        read_only_fields = ('date',) 
+        read_only_fields = ('date',)
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ('created_at', 'ip')

@@ -3,6 +3,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AdminProvider } from './contexts/AdminContext';
+import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Notice from './pages/Notice';
@@ -13,6 +14,8 @@ import Resources from './pages/Resources';
 import Update from './pages/Update';
 import Admin from './pages/Admin';
 import Database from './pages/Database';
+import Login from './pages/Login';
+import Review from './pages/Review';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function AppContent() {
@@ -32,6 +35,8 @@ function AppContent() {
             <Route path="/update" element={<Update />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/database" element={<Database />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/review" element={<Review />} />
           </Routes>
         </Layout>
       </Router>
@@ -42,11 +47,13 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AdminProvider>
-        <AppContent />
-      </AdminProvider>
+      <AuthProvider>
+        <AdminProvider>
+          <AppContent />
+        </AdminProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
 
-export default App; 
+export default App;

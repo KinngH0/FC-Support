@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getToken } from '../utils/jwt';
 
-const ADMIN_PASSWORD = '0824';
 const LOCAL_KEY = 'fc_support_is_admin';
 
 const AdminContext = createContext();
@@ -11,16 +11,13 @@ export const AdminProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_KEY);
-    if (stored === 'true') setIsAdmin(true);
+    // JWT 토큰이 있으면 관리자 모드로 간주
+    if (getToken()) setIsAdmin(true);
+    else setIsAdmin(false);
   }, []);
 
   const login = (pw) => {
-    if (pw === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      localStorage.setItem(LOCAL_KEY, 'true');
-      return true;
-    }
+    // 더 이상 프론트 비번만으로 관리자 모드 진입 불가
     return false;
   };
 
@@ -34,4 +31,4 @@ export const AdminProvider = ({ children }) => {
       {children}
     </AdminContext.Provider>
   );
-}; 
+};

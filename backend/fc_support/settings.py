@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-dx-ev7goz1p-1x5tt1i+@lxk+127xn&f^l5$+&qy*7wiv%*ll-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # 실제 운영시에는 특정 도메인으로 제한하는 것이 좋습니다
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
     'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'fc_support.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'frontend' / 'public'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,7 +119,12 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+
+# 미디어 파일 설정
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -145,4 +152,29 @@ LOGGING = {
     },
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS 설정
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://121.155.140.29:3000",
+    # 실제 운영 도메인을 추가하세요
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# 보안 설정
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}

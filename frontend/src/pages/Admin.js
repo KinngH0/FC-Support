@@ -43,6 +43,20 @@ function getTodayTraffic() {
   return data[today] || { visitors: [], pageviews: 0, pages: {}, referrers: {} };
 }
 
+// 누적 방문자 수 계산 함수
+function getTotalVisitorCount() {
+  const data = JSON.parse(localStorage.getItem(TRAFFIC_KEY) || '{}');
+  const allDays = Object.values(data);
+  // 각 일자의 visitors(배열) 합집합
+  const visitorSet = new Set();
+  allDays.forEach(day => {
+    if (Array.isArray(day.visitors)) {
+      day.visitors.forEach(v => visitorSet.add(v));
+    }
+  });
+  return visitorSet.size;
+}
+
 // 사용자 행동 기록
 const USER_EVENT_KEY = 'fc_support_user_events';
 function logUserEvent(type, detail) {
@@ -107,6 +121,7 @@ const Admin = () => {
   const [serverStats, setServerStats] = useState({ cpu: 0, memory: 0, disk: 0 });
   const [contentStats, setContentStats] = useState({ totalUsers: 0, activeUsers: 0, totalPosts: 0, totalComments: 0 });
   const [todayVisitorCount, setTodayVisitorCount] = useState(0);
+  const [totalVisitorCount, setTotalVisitorCount] = useState(getTotalVisitorCount());
 
   useEffect(() => {
     if (!isAdmin) navigate('/');
@@ -119,6 +134,7 @@ const Admin = () => {
   useEffect(() => {
     recordTraffic(location.pathname);
     setTraffic(getTodayTraffic());
+    setTotalVisitorCount(getTotalVisitorCount());
   }, [location.pathname]);
 
   // 사용자 행동/관리자/알림 데이터 실시간 반영
@@ -165,6 +181,11 @@ const Admin = () => {
   return (
     <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
       <Paper sx={{ p: 0, minWidth: 360, width: '100%', maxWidth: 900 }}>
+        <Box sx={{ width: '100%', mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
+            관리자 페이지
+          </Typography>
+        </Box>
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
@@ -182,7 +203,8 @@ const Admin = () => {
             <Typography variant="h6">트래픽/방문자</Typography>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ mb: 2 }}>
-              <Chip label={`오늘 방문자: ${todayVisitorCount}`} sx={{ mr: 1 }} />
+              <Chip label={`오늘 방문자: ${traffic.visitors.length}`} sx={{ mr: 1 }} />
+              <Chip label={`누적 방문자: ${totalVisitorCount}`} sx={{ mr: 1 }} />
               <Chip label={`페이지뷰: ${traffic.pageviews}`} sx={{ mr: 1 }} />
             </Box>
             <Typography variant="subtitle1" sx={{ mt: 2 }}>인기 페이지</Typography>
@@ -297,6 +319,18 @@ const Admin = () => {
               </Table>
             </TableContainer>
             <Typography variant="subtitle1">IP 차단 관리</Typography>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <TextField
+                label="IP 입력 (예: 222.238.123.45)"
+                size="small"
+                value={ipInput}
+                onChange={e => setIpInput(e.target.value)}
+                sx={{ width: 220 }}
+              />
+              <Button variant="contained" color="error" onClick={handleBlockIp} disabled={!ipInput.trim() || blockedIps.includes(ipInput.trim())}>
+                차단
+              </Button>
+            </Box>
             <TableContainer sx={{ mb: 2 }}>
               <Table size="small">
                 <TableHead>

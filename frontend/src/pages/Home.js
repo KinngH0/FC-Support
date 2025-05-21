@@ -40,6 +40,21 @@ const Home = () => {
       <Box
         sx={{
           width: "100%",
+          mb: 4,
+        }}
+      >
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ textAlign: "center" }}
+        >
+          FC SUPPORT
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          width: "100%",
           mb: 2,
           display: "flex",
           justifyContent: "center",

@@ -83,11 +83,16 @@ class Review(models.Model):
     password = models.CharField(max_length=128)  # 비밀번호(해시 또는 평문)
     review = models.TextField()  # 리뷰 내용
     score = models.PositiveSmallIntegerField()  # 별점(1~5)
-    grade = models.PositiveSmallIntegerField(default=1)  # 강화단계
-    ip = models.GenericIPAddressField(null=True, blank=True)  # 작성자 IP
     created_at = models.DateTimeField(auto_now_add=True)
-    good = models.PositiveIntegerField(default=0)  # 추천 수
-    bad = models.PositiveIntegerField(default=0)  # 비추천 수
+    # 추가 필드
+    season_name = models.CharField(max_length=64, blank=True, null=True)  # 시즌명
+    player_name = models.CharField(max_length=64, blank=True, null=True)  # 선수명
+    upgrade_level = models.PositiveSmallIntegerField(blank=True, null=True)  # 강화단계
+    teamcolor = models.CharField(max_length=64, blank=True, null=True)  # 팀컬러
+    position = models.CharField(max_length=32, blank=True, null=True)  # 포지션
+    ip = models.GenericIPAddressField(blank=True, null=True)
+    good = models.PositiveIntegerField(default=0)  # 좋아요
+    bad = models.PositiveIntegerField(default=0)   # 싫어요
 
     def __str__(self):
         return f"{self.name} - {self.spid} ({self.season_id})"

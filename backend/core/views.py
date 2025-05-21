@@ -355,36 +355,33 @@ class ReviewViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         spid = self.request.query_params.get('spid')
         season_id = self.request.query_params.get('season_id')
-        # spid는 DB에 6자리(시즌+pid)로 저장되어 있으므로, 프론트에서 넘어온 값이 6자리인지 확인
-        if spid and len(spid) == 6:
+        if spid:
             qs = qs.filter(spid=spid)
-        elif spid and len(spid) == 5:
-            # 혹시 5자리로 넘어오면 앞에 0을 붙여서 6자리로 맞춤
-            qs = qs.filter(spid=f"0{spid}")
         if season_id:
             qs = qs.filter(season_id=season_id)
         return qs
 
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        # grade(강화단계) 필드가 없으면 1로 기본값
-        if 'grade' not in data:
-            data['grade'] = 1
-        # IP 저장: X-Forwarded-For, Proxy-Client-IP, WL-Proxy-Client-IP, REMOTE_ADDR 순서로 시도
-        ip = (
-            request.META.get('HTTP_X_FORWARDED_FOR') or
-            request.META.get('HTTP_PROXY_CLIENT_IP') or
-            request.META.get('HTTP_WL_PROXY_CLIENT_IP') or
-            request.META.get('REMOTE_ADDR')
-        )
-        if ip and ',' in ip:
-            ip = ip.split(',')[0].strip()
-        data['ip'] = ip if ip else None
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=201, headers=headers)
+    def perform_create(self, serializer):
+        import traceback, sys
+        try:
+            request = self.request
+            ip = (
+                request.META.get('HTTP_X_FORWARDED_FOR')
+                or request.META.get('REMOTE_ADDR')
+                or ''
+            )
+            if ip and ',' in ip:
+                ip = ip.split(',')[0].strip()
+            if ip.startswith('::ffff:'):
+                ip = ip[7:]
+            if not ip:
+                ip = None
+            print('==== 리뷰 등록 요청 데이터 ====', request.data)
+            serializer.save(ip=ip)
+        except Exception:
+            print('==== 리뷰 등록 perform_create 예외 발생 ====', file=sys.stderr)
+            traceback.print_exc()
+            raise
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -397,18 +394,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         password = request.data.get('password')
-        # 추천/비추천 처리
-        if request.data.get('good') is True or request.data.get('good') == 'true':
-            instance.good = (instance.good or 0) + 1
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        if request.data.get('bad') is True or request.data.get('bad') == 'true':
-            instance.bad = (instance.bad or 0) + 1
-            instance.save()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        # 기존 비밀번호 검증 및 수정 로직
         if not password or password != instance.password:
             from rest_framework.response import Response
             return Response({'detail': '비밀번호가 일치하지 않습니다.'}, status=400)

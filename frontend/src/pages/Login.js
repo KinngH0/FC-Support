@@ -19,7 +19,11 @@ const Login = () => {
 
   return (
     <Box sx={{ maxWidth: 360, mx: 'auto', mt: 8 }}>
-      <Typography variant="h5" gutterBottom>관리자 로그인</Typography>
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
+          관리자 로그인
+        </Typography>
+      </Box>
       <form onSubmit={handleSubmit}>
         <TextField
           label="아이디"

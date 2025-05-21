@@ -19,8 +19,11 @@ import {
 import { motion } from "framer-motion";
 import { teamColors } from "../constants/teamColors";
 import axios from "axios";
+import { useTheme } from "../contexts/ThemeContext";
 
 const PickRate = () => {
+  const { isDarkMode } = useTheme();
+
   const [form, setForm] = useState({
     rankRange: "",
     teamColor: "",
@@ -133,6 +136,21 @@ const PickRate = () => {
       "GK",
     ];
 
+    const tableHeaderSx = {
+      backgroundColor: isDarkMode ? "#23272f" : "#d5d5d5",
+      color: isDarkMode ? "#fff" : "#222",
+      borderBottom: `1px solid ${isDarkMode ? '#444' : '#999'}`,
+      borderRight: `1px solid ${isDarkMode ? '#444' : '#999'}`,
+      textAlign: "center",
+    };
+    const tableCellSx = {
+      borderBottom: `1px solid ${isDarkMode ? '#444' : '#999'}`,
+      borderRight: `1px solid ${isDarkMode ? '#444' : '#999'}`,
+      textAlign: "center",
+      color: isDarkMode ? "#fff" : undefined,
+      backgroundColor: isDarkMode ? "#181a1b" : undefined,
+    };
+
     return (
       <>
         <Box sx={{ mb: 4 }}>
@@ -143,104 +161,29 @@ const PickRate = () => {
             조회 인원 : {results.manager_count}명
           </Typography>
         </Box>
-
         {/* 포메이션 순위 테이블 추가 */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
             포메이션 순위
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ background: isDarkMode ? '#181a1b' : undefined }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      width: "10%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    순위
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "30%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    포메이션
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "30%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    사용률
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "30%",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    사용자
-                  </TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "10%" }}>순위</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "30%" }}>포메이션</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "30%" }}>사용률</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "30%", borderRight: 0 }}>사용자</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {results.formation_rank.map((formation, index) => (
                   <TableRow key={index}>
-                    <TableCell
-                      sx={{
-                        width: "10%",
-                        borderRight: "1px solid #999999",
-                        borderBottom: "1px solid #999999",
-                        textAlign: "center",
-                      }}
-                    >
-                      {formation.rank}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        width: "30%",
-                        borderRight: "1px solid #999999",
-                        borderBottom: "1px solid #999999",
-                        textAlign: "center",
-                      }}
-                    >
-                      {formation.formation}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        width: "30%",
-                        borderRight: "1px solid #999999",
-                        borderBottom: "1px solid #999999",
-                        textAlign: "center",
-                      }}
-                    >
-                      {formation.percentage}%({formation.count}명)
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        width: "30%",
-                        borderBottom: "1px solid #999999",
-                        textAlign: "center",
-                      }}
-                    >
-                      {formation.top_users
-                        ? formation.top_users.join(", ")
-                        : ""}
+                    <TableCell sx={{ ...tableCellSx, width: "10%" }}>{formation.rank}</TableCell>
+                    <TableCell sx={{ ...tableCellSx, width: "30%" }}>{formation.formation}</TableCell>
+                    <TableCell sx={{ ...tableCellSx, width: "30%" }}>{formation.percentage}%({formation.count}명)</TableCell>
+                    <TableCell sx={{ ...tableCellSx, width: "30%", borderRight: 0 }}>
+                      {formation.top_users ? formation.top_users.join(", ") : ""}
                       {formation.count > 3 && ` 외 ${formation.count - 3}명`}
                     </TableCell>
                   </TableRow>
@@ -249,222 +192,56 @@ const PickRate = () => {
             </Table>
           </TableContainer>
         </Box>
-
         {/* 통계 정보 테이블 추가 */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
             통계 정보
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ background: isDarkMode ? '#181a1b' : undefined }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    구분
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    평균
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    최고
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderBottom: "1px solid #999999",
-                      backgroundColor: "#d5d5d5",
-                      textAlign: "center",
-                    }}
-                  >
-                    최저
-                  </TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "25%" }}>구분</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "25%" }}>평균</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "25%" }}>최고</TableCell>
+                  <TableCell sx={{ ...tableHeaderSx, width: "25%", borderRight: 0 }}>최저</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    등수
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.rank_stats.avg !== null && results.rank_stats.avg !== undefined
-                      ? `${Number(results.rank_stats.avg).toLocaleString()}위`
-                      : "-"}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.rank_stats.max !== null && results.rank_stats.max !== undefined
-                      ? `${Number(results.rank_stats.max).toLocaleString()}위 - ${results.rank_stats.max_nickname || ""}`
-                      : "-"}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.rank_stats.min !== null && results.rank_stats.min !== undefined
-                      ? `${Number(results.rank_stats.min).toLocaleString()}위 - ${results.rank_stats.min_nickname || ""}`
-                      : "-"}
-                  </TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", fontWeight: "bold" }}>등수</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{results.rank_stats.avg !== null && results.rank_stats.avg !== undefined ? `${Number(results.rank_stats.avg).toLocaleString()}위` : "-"}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{results.rank_stats.max !== null && results.rank_stats.max !== undefined ? `${Number(results.rank_stats.max).toLocaleString()}위 - ${results.rank_stats.max_nickname || ""}` : "-"}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", borderRight: 0 }}>{results.rank_stats.min !== null && results.rank_stats.min !== undefined ? `${Number(results.rank_stats.min).toLocaleString()}위 - ${results.rank_stats.min_nickname || ""}` : "-"}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    점수
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.score_stats.avg !== null && results.score_stats.avg !== undefined
-                      ? `${Number(results.score_stats.avg).toLocaleString()}점`
-                      : "-"}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.score_stats.max !== null && results.score_stats.max !== undefined
-                      ? `${Number(results.score_stats.max).toLocaleString()}점 - ${results.score_stats.max_nickname || ""}`
-                      : "-"}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {results.score_stats.min !== null && results.score_stats.min !== undefined
-                      ? `${Number(results.score_stats.min).toLocaleString()}점 - ${results.score_stats.min_nickname || ""}`
-                      : "-"}
-                  </TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", fontWeight: "bold" }}>점수</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{results.score_stats.avg !== null && results.score_stats.avg !== undefined ? `${Number(results.score_stats.avg).toLocaleString()}점` : "-"}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{results.score_stats.max !== null && results.score_stats.max !== undefined ? `${Number(results.score_stats.max).toLocaleString()}점 - ${results.score_stats.max_nickname || ""}` : "-"}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", borderRight: 0 }}>{results.score_stats.min !== null && results.score_stats.min !== undefined ? `${Number(results.score_stats.min).toLocaleString()}점 - ${results.score_stats.min_nickname || ""}` : "-"}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    구단가치
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {formatClubValue(results.club_value_stats.avg)}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderRight: "1px solid #999999",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {formatClubValue(results.club_value_stats.max)} -{" "}
-                    {results.club_value_stats.max_nickname}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "25%",
-                      borderBottom: "1px solid #999999",
-                      textAlign: "center",
-                    }}
-                  >
-                    {formatClubValue(results.club_value_stats.min)} -{" "}
-                    {results.club_value_stats.min_nickname}
-                  </TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", fontWeight: "bold" }}>구단가치</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{formatClubValue(results.club_value_stats.avg)}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%" }}>{formatClubValue(results.club_value_stats.max)} - {results.club_value_stats.max_nickname}</TableCell>
+                  <TableCell sx={{ ...tableCellSx, width: "25%", borderRight: 0 }}>{formatClubValue(results.club_value_stats.min)} - {results.club_value_stats.min_nickname}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
         </Box>
-
+        {/* 포지션별 테이블 */}
         {positionOrder.map((position) => {
           const positionData = results[position];
           if (!positionData) return null;
-
-          // 정렬 상태 가져오기
           const sortConfig = sortConfigs[position] || {
             key: "usage_rate",
             direction: "desc",
           };
-          // 정렬 적용
           const sortedData = [...positionData].sort((a, b) => {
             const { key, direction } = sortConfig;
             let aValue = a[key];
             let bValue = b[key];
-            // 숫자 변환 시도
             if (key === "usage_rate" || key === "grade" || key === "rank") {
               aValue = Number(aValue);
               bValue = Number(bValue);
@@ -473,162 +250,38 @@ const PickRate = () => {
             if (aValue > bValue) return direction === "asc" ? 1 : -1;
             return 0;
           });
-
-          // 정렬 방향 표시
           const getSortArrow = (colKey) => {
             if (sortConfig.key !== colKey) return "";
             return sortConfig.direction === "asc" ? " ▲" : " ▼";
           };
-
           return (
             <Box key={position} sx={{ mb: 4 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
                 {position}
               </Typography>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} sx={{ background: isDarkMode ? '#181a1b' : undefined }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell
-                        sx={{
-                          width: "6%",
-                          borderRight: "1px solid #999999",
-                          borderBottom: "1px solid #999999",
-                          cursor: "pointer",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                        onClick={() => handleSort(position, "rank")}
-                      >
-                        순위{getSortArrow("rank")}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          width: "30%",
-                          borderRight: "1px solid #999999",
-                          borderBottom: "1px solid #999999",
-                          cursor: "pointer",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                        onClick={() => handleSort(position, "player_name")}
-                      >
-                        선수명{getSortArrow("player_name")}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          width: "10%",
-                          borderRight: "1px solid #999999",
-                          borderBottom: "1px solid #999999",
-                          cursor: "pointer",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                        onClick={() => handleSort(position, "season")}
-                      >
-                        시즌{getSortArrow("season")}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          width: "10%",
-                          borderRight: "1px solid #999999",
-                          borderBottom: "1px solid #999999",
-                          cursor: "pointer",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                        onClick={() => handleSort(position, "grade")}
-                      >
-                        강화단계{getSortArrow("grade")}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          width: "10%",
-                          borderRight: "1px solid #999999",
-                          borderBottom: "1px solid #999999",
-                          cursor: "pointer",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                        onClick={() => handleSort(position, "usage_rate")}
-                      >
-                        사용률{getSortArrow("usage_rate")}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          width: "34%",
-                          borderBottom: "1px solid #999999",
-                          backgroundColor: "#d5d5d5",
-                          textAlign: "center",
-                        }}
-                      >
-                        사용자
-                      </TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "6%" }} onClick={() => handleSort(position, "rank")}>순위{getSortArrow("rank")}</TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "30%" }} onClick={() => handleSort(position, "player_name")}>선수명{getSortArrow("player_name")}</TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "10%" }} onClick={() => handleSort(position, "season")}>시즌{getSortArrow("season")}</TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "10%" }} onClick={() => handleSort(position, "grade")}>강화단계{getSortArrow("grade")}</TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "10%" }} onClick={() => handleSort(position, "usage_rate")}>사용률{getSortArrow("usage_rate")}</TableCell>
+                      <TableCell sx={{ ...tableHeaderSx, width: "34%", borderRight: 0 }}>사용자</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {sortedData.map((player, index) => (
                       <TableRow key={index}>
-                        <TableCell
-                          sx={{
-                            width: "6%",
-                            borderRight: "1px solid #999999",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
-                          {index + 1}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "30%",
-                            borderRight: "1px solid #999999",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
-                          {player.player_name}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "10%",
-                            borderRight: "1px solid #999999",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
-                          {player.season}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "10%",
-                            borderRight: "1px solid #999999",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
-                          {player.grade}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "10%",
-                            borderRight: "1px solid #999999",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
-                          {player.usage_rate}%({player.user_count}명)
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "34%",
-                            borderBottom: "1px solid #999999",
-                            textAlign: "center",
-                          }}
-                        >
+                        <TableCell sx={{ ...tableCellSx, width: "6%" }}>{index + 1}</TableCell>
+                        <TableCell sx={{ ...tableCellSx, width: "30%" }}>{player.player_name}</TableCell>
+                        <TableCell sx={{ ...tableCellSx, width: "10%" }}>{player.season}</TableCell>
+                        <TableCell sx={{ ...tableCellSx, width: "10%" }}>{player.grade}</TableCell>
+                        <TableCell sx={{ ...tableCellSx, width: "10%" }}>{player.usage_rate}%({player.user_count}명)</TableCell>
+                        <TableCell sx={{ ...tableCellSx, width: "34%", borderRight: 0 }}>
                           {player.top_users.join(", ")}
-                          {player.remaining_users > 0 &&
-                            ` 외 ${player.remaining_users}명`}
+                          {player.remaining_users > 0 && ` 외 ${player.remaining_users}명`}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -649,7 +302,7 @@ const PickRate = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
           픽률조회
         </Typography>
       </motion.div>

@@ -65,7 +65,7 @@ const TeamColor = () => {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
         팀컬러 리스트
       </Typography>
       <Paper sx={{ p: 3, mb: 4 }}>

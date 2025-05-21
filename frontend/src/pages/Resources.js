@@ -115,7 +115,12 @@ const Resources = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ textAlign: "center" }}
+        >
           자료실
         </Typography>
         {isAdmin && (

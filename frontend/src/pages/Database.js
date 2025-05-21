@@ -64,6 +64,12 @@ const Database = () => {
 
   return (
     <Box>
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
+          데이터베이스
+        </Typography>
+      </Box>
+
       <Typography variant="h6">매치 요약 정보</Typography>
       <Divider sx={{ my: 1 }} />
       
@@ -176,4 +182,4 @@ const Database = () => {
   );
 };
 
-export default Database; 
+export default Database;

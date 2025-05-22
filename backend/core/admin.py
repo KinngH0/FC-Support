@@ -14,10 +14,10 @@ class PlayerAdmin(admin.ModelAdmin):
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
-        'spid', 'season_id', 'season_name', 'player_name', 'upgrade_level', 'teamcolor', 'position',
+        'pid', 'season_id', 'season_name', 'player_name', 'upgrade_level', 'teamcolor', 'position',
         'name', 'password', 'score', 'review', 'good', 'bad', 'ip', 'created_at'
     )
-    search_fields = ('spid', 'season_id', 'name', 'review')
+    search_fields = ('pid', 'season_id', 'name', 'review')
     list_filter = ('season_id', 'score')
 
 admin.site.register(Notice)

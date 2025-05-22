@@ -353,10 +353,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        spid = self.request.query_params.get('spid')
+        pid = self.request.query_params.get('pid')
         season_id = self.request.query_params.get('season_id')
-        if spid:
-            qs = qs.filter(spid=spid)
+        if pid:
+            qs = qs.filter(pid=pid)
         if season_id:
             qs = qs.filter(season_id=season_id)
         return qs
@@ -398,6 +398,42 @@ class ReviewViewSet(viewsets.ModelViewSet):
             from rest_framework.response import Response
             return Response({'detail': '비밀번호가 일치하지 않습니다.'}, status=400)
         return super().partial_update(request, *args, **kwargs)
+
+    def reaction(self, request, pk=None):
+        try:
+            review = self.get_object()
+            reaction_type = request.data.get('type')
+            user_id = request.data.get('userId')
+
+            if not reaction_type or not user_id:
+                return Response({'detail': '필수 파라미터가 누락되었습니다.'}, status=400)
+
+            # 사용자의 이전 반응 확인
+            user_reactions = review.user_reactions or {}
+            current_reaction = user_reactions.get(user_id)
+
+            # 이전 반응이 있으면 취소
+            if current_reaction:
+                if current_reaction == 'good':
+                    review.good = max(0, review.good - 1)
+                else:
+                    review.bad = max(0, review.bad - 1)
+                user_reactions.pop(user_id)
+
+            # 새로운 반응이 이전 반응과 다르면 추가
+            if not current_reaction or current_reaction != reaction_type:
+                if reaction_type == 'good':
+                    review.good += 1
+                else:
+                    review.bad += 1
+                user_reactions[user_id] = reaction_type
+
+            review.user_reactions = user_reactions
+            review.save()
+            return Response(self.get_serializer(review).data)
+        except Exception as e:
+            print(f"반응 처리 중 오류 발생: {str(e)}")
+            return Response({'detail': str(e)}, status=400)
 
 @api_view(['POST'])
 def log_visitor(request):

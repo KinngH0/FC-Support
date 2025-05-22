@@ -6,7 +6,7 @@ router = DefaultRouter()
 router.register(r'notices', views.NoticeViewSet)
 router.register(r'updates', views.UpdateViewSet)
 router.register(r'resources', views.ResourceViewSet)
-router.register(r'reviews', views.ReviewViewSet)
+router.register(r'reviews', views.ReviewViewSet, basename='review')
 
 urlpatterns = [
     # ... existing urls ...
@@ -17,4 +17,5 @@ urlpatterns = [
     path('api/log-visitor/', views.log_visitor, name='log-visitor'),
     path('api/today-visitor-count/', views.today_visitor_count, name='today-visitor-count'),
     path('api/', include(router.urls)),
+    path('api/reviews/<int:pk>/reaction/', views.ReviewViewSet.as_view({'post': 'reaction'}), name='review-reaction'),
 ]

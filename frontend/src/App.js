@@ -16,30 +16,29 @@ import Admin from './pages/Admin';
 import Database from './pages/Database';
 import Login from './pages/Login';
 import Review from './pages/Review';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 function AppContent() {
   const { theme } = useTheme();
+  const location = useLocation();
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/notice" element={<Notice />} />
-            <Route path="/pick-rate" element={<PickRate />} />
-            <Route path="/team-color" element={<TeamColor />} />
-            <Route path="/efficiency" element={<Efficiency />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/update" element={<Update />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/database" element={<Database />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/review" element={<Review />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/notice" element={<Notice />} />
+          <Route path="/pick-rate" element={<PickRate />} />
+          <Route path="/team-color" element={<TeamColor />} />
+          <Route path="/efficiency" element={<Efficiency />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/update" element={<Update />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/database" element={<Database />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/review" element={<Review key={location.search} />} />
+        </Routes>
+      </Layout>
     </MuiThemeProvider>
   );
 }
@@ -49,7 +48,9 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AdminProvider>
-          <AppContent />
+          <Router>
+            <AppContent />
+          </Router>
         </AdminProvider>
       </AuthProvider>
     </ThemeProvider>

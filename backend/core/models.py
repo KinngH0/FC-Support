@@ -77,7 +77,7 @@ class VisitorLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Review(models.Model):
-    spid = models.CharField(max_length=16)  # 선수 id (str)
+    pid = models.CharField(max_length=16)  # 선수 id (str)
     season_id = models.CharField(max_length=8)  # 시즌 id (str)
     name = models.CharField(max_length=32)  # 닉네임
     password = models.CharField(max_length=128)  # 비밀번호(해시 또는 평문)
@@ -93,6 +93,7 @@ class Review(models.Model):
     ip = models.GenericIPAddressField(blank=True, null=True)
     good = models.PositiveIntegerField(default=0)  # 좋아요
     bad = models.PositiveIntegerField(default=0)   # 싫어요
+    user_reactions = models.JSONField(default=dict)  # 사용자별 반응 저장
 
     def __str__(self):
-        return f"{self.name} - {self.spid} ({self.season_id})"
+        return f"{self.name} - {self.pid} ({self.season_id})"
